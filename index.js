@@ -136,7 +136,7 @@ app.post('/forget-password', async (req, res) => {
     }
 });
 
-app.get("/cities", verifyToken,async(req,res)=>{
+app.get("/cities", async(req,res)=>{
     let cities = await City.findAll();
     if(cities.length>0){
         res.send(cities)
