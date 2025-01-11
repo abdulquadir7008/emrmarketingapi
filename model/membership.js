@@ -22,6 +22,7 @@ const Membership = sequelize.define('Membership', {
     landmark:DataTypes.STRING,
     status:DataTypes.STRING,
     userid: DataTypes.STRING,
+    sess:DataTypes.STRING,
 }, { tableName: 'membership', timestamps: false });
 
 module.exports = Membership;

@@ -41,6 +41,7 @@ app.post("/register", async (req, res) => {
             postalcode,
             landmark,
             status:uniqueStatusId,
+            sess,
         });
         const customUserId = `emr00${newMember.member_id}`;
         await Membership.update(
