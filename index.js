@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cors());
 
 app.post("/register", async (req, res) => {
-    const { fname, lname, phone, password, email, country, stree_address, city, state, gender, postalcode, landmark, status } = req.body;
+    const { fname, lname, phone, password, email, country, stree_address, city, state, gender, postalcode, landmark, status,sess } = req.body;
 
     try {
         const existingMember = await Membership.findOne({ where: { email } });
