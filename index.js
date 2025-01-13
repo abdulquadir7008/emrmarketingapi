@@ -144,7 +144,41 @@ app.get("/cities", async(req,res)=>{
     }else{
         res.send({result: "No Products Found"})
     }
-})
+});
+
+// Passcode and Session ID Verification API
+app.post('/verify', async (req, res) => {
+    const { sessionId, passcode } = req.body;
+
+    try {
+        // Validate input
+        if (!sessionId || !passcode) {
+            return res.status(400).send({ result: "Session ID and Passcode are required" });
+        }
+
+        // Check in Membership model
+        const user = await Membership.findOne({ where: { sess: sessionId, status: passcode } });
+
+        if (!user) {
+            return res.status(401).send({ result: "Invalid session ID or passcode" });
+        }
+
+        // Update status to 2
+        user.status = "2";
+        await user.save(); // Save the updated user
+
+        // Respond with success
+        res.status(200).send({
+            result: "Verification successful",
+            user: { id: user.member_id, email: user.email },
+        });
+    } catch (error) {
+        console.error("Error during passcode and session verification:", error);
+        res.status(500).send({ result: "An internal server error occurred" });
+    }
+});
+
+
 
 function verifyToken(req,res,next){
     let token = req.headers['authorization'];
