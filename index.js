@@ -117,6 +117,11 @@ app.post('/forget-password', async (req, res) => {
         if (!user) {
             return res.status(404).send({ result: "No user found with this email" });
         }
+        const uniqueStatusId = Math.floor(100000 + Math.random() * 900000).toString();
+        await Membership.update(
+            { status: uniqueStatusId },
+            { where: { member_id: user.member_id } }
+        );
         const resetToken = Jwt.sign({ id: user.member_id }, jwtKey, { expiresIn: "1h" });
         const resetLink = `https://yourfrontenddomain.com/reset-password?token=${resetToken}`;
         const msg = {
@@ -126,6 +131,7 @@ app.post('/forget-password', async (req, res) => {
             html: `<p>Hi ${user.fname},</p>
                    <p>You requested to reset your password. Click the link below to reset it:</p>
                    <a href="${resetLink}">Reset Password</a>
+                   <p>${uniqueStatusId}</p>
                    <p>If you didn't request this, please ignore this email.</p>`,
         };
 
@@ -178,6 +184,32 @@ app.post('/verify', async (req, res) => {
         console.error("Error during passcode and session verification:", error);
         res.status(500).send({ result: "An internal server error occurred" });
     }
+});
+
+app.post('/reset-password', async (req, res) => {
+  const { getEmail, passcode, newPassword } = req.body;
+  if (!getEmail || !passcode || !newPassword) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    const user = await Membership.findOne({ where: { email: getEmail } });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid Email ID' });
+    }
+    if (user.status !== passcode) {
+      return res.status(401).json({ message: 'Invalid passcode' });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    user.status = 2;
+    await user.save();
+    res.status(200).json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 
