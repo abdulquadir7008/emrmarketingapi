@@ -12,9 +12,10 @@ const City = require('./model/cityFetch');
 const jwtKey = 'e-comm';
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-app = express();
-app.use(express.json());
+const app = express();
 app.use(cors());
+app.use(express.json());
+
 
 app.post("/register", async (req, res) => {
     const { fname, lname, phone, password, email, country, stree_address, city, state, gender, postalcode, landmark, status,sess } = req.body;
@@ -149,6 +150,7 @@ app.get("/cities", async(req,res)=>{
 // Passcode and Session ID Verification API
 app.post('/verify', async (req, res) => {
     const { sessionId, passcode } = req.body;
+    console.log('Received data:', { sessionId, passcode });
 
     try {
         // Validate input
