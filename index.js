@@ -213,6 +213,34 @@ app.post('/reset-password', async (req, res) => {
 });
 
 
+app.put('/profile/:id', async (req, res) => {
+  const userId = req.params.id;
+  const { fname, lname, email, phone, stree_address, pincode, landmark, city, state } = req.body;
+
+  try {
+    // Validation for missing fields
+    if (!fname || !lname || !email || !phone || !pincode || !city || !state) {
+      return res.status(400).json({ message: 'Please fill all required fields' });
+    }
+
+    // Update the profile using Sequelize
+    const [updated] = await Membership.update(
+      { fname, lname, email, phone, stree_address, pincode, landmark, city, state },
+      { where: { member_id: userId } }
+    );
+
+    if (updated === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'Profile updated successfully' });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Error updating profile', error: error.message });
+  }
+});
+
+
 
 function verifyToken(req,res,next){
     let token = req.headers['authorization'];
